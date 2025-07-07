@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMsal, useIsAuthenticated } from '@azure/msal-react';
-import { Box, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { Box, Snackbar, Alert } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 
 // Components
@@ -17,8 +17,8 @@ import LoadingSpinner from './components/LoadingSpinner';
 import NotificationCenter from './components/NotificationCenter';
 
 // Store
-import { RootState, AppDispatch } from './store/store';
-import { selectIsAuthenticated, selectIsLoading, selectError } from './store/slices/authSlice';
+import { AppDispatch } from './store/store';
+import { selectIsLoading, selectError } from './store/slices/authSlice';
 import { selectNotifications, removeNotification } from './store/slices/uiSlice';
 
 // Services
