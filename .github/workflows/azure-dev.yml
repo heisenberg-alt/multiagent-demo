@@ -38,7 +38,22 @@ jobs:
 
 
       - name: Provision Infrastructure
-        run: azd provision --no-prompt
+        run: |
+          # Configure environment for existing deployment
+          azd env set AZURE_LOCATION eastus2
+          azd env set AZURE_RESOURCE_GROUP rg-bobst-agents  
+          azd env set AZURE_PRINCIPAL_ID 44c6741c-0946-4213-b719-eda2cc36b0df
+          
+          # Check if resource group exists, if so skip provision
+          if az group show --name rg-bobst-agents >/dev/null 2>&1; then
+            echo "Resource group exists, skipping provision"
+            # Import existing deployment state
+            azd env refresh --no-prompt
+          else
+            echo "Resource group doesn't exist, provisioning"
+            azd provision --no-prompt
+          fi
+        shell: bash
 
       - name: Deploy Application
         run: azd deploy --no-prompt
