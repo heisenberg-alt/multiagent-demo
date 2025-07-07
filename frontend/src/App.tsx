@@ -102,7 +102,7 @@ const App: React.FC = () => {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <Layout>
                   <DashboardPage />
                 </Layout>
@@ -112,7 +112,7 @@ const App: React.FC = () => {
           <Route
             path="/agents"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <Layout>
                   <AgentsPage />
                 </Layout>
@@ -122,7 +122,7 @@ const App: React.FC = () => {
           <Route
             path="/chat"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <Layout>
                   <ChatPage />
                 </Layout>
@@ -132,7 +132,7 @@ const App: React.FC = () => {
           <Route
             path="/chat/:sessionId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <Layout>
                   <ChatPage />
                 </Layout>
@@ -142,7 +142,7 @@ const App: React.FC = () => {
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <Layout>
                   <SettingsPage />
                 </Layout>
