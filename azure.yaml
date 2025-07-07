@@ -4,6 +4,11 @@ metadata:
   template: multiagent-demo@1.0.0
   description: A multiagent system demo with Copilot Studio, Azure AI Foundry agents, and LangChain orchestration
 
+infra:
+  provider: bicep
+  path: infra
+  module: main
+
 hooks:
   postdeploy:
     shell: pwsh
