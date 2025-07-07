@@ -3,12 +3,12 @@ import { Configuration, RedirectRequest, PopupRequest } from '@azure/msal-browse
 // MSAL configuration
 export const msalConfig: Configuration = {
   auth: {
-    clientId: process.env.REACT_APP_AZURE_CLIENT_ID || 'your-client-id',
-    authority: `https://login.microsoftonline.com/${process.env.REACT_APP_AZURE_TENANT_ID || 'common'}`,
-    redirectUri: process.env.REACT_APP_REDIRECT_URI || window.location.origin,
+    clientId: process.env.REACT_APP_AZURE_CLIENT_ID || '480ca618-5f28-494b-bf9d-d1a803b8a840',
+    authority: process.env.REACT_APP_AZURE_AUTHORITY || 'https://login.microsoftonline.com/22160f2d-f7a0-4f0f-b25e-ce5b8f2b98ab',
+    redirectUri: process.env.REACT_APP_REDIRECT_URI || 'https://green-sand-0a95fec0f.1.azurestaticapps.net',
   },
   cache: {
-    cacheLocation: 'localStorage',
+    cacheLocation: 'sessionStorage',
     storeAuthStateInCookie: false,
   },
 };
@@ -19,12 +19,7 @@ export const loginRequest: RedirectRequest = {
     'openid',
     'profile',
     'email',
-    'User.Read',
-    'Mail.Read',
-    'Files.ReadWrite',
-    'Sites.ReadWrite.All',
-    'Team.ReadBasic.All',
-    'Channel.ReadBasic.All'
+    'api://multiagent-demo-api-487900148/access_as_user'
   ],
 };
 
@@ -32,14 +27,9 @@ export const loginRequest: RedirectRequest = {
 export const popupRequest: PopupRequest = {
   scopes: [
     'openid',
-    'profile',
+    'profile', 
     'email',
-    'User.Read',
-    'Mail.Read',
-    'Files.ReadWrite',
-    'Sites.ReadWrite.All',
-    'Team.ReadBasic.All',
-    'Channel.ReadBasic.All'
+    'api://multiagent-demo-api-487900148/access_as_user'
   ],
 };
 

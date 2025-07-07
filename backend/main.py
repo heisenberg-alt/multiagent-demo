@@ -20,14 +20,13 @@ from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
 from azure.keyvault.secrets import SecretClient
 from azure.core.exceptions import AzureError
 
-# Authentication and authorization
-from auth.auth_handler import AuthHandler
-from auth.rbac_handler import RBACHandler
+# Authentication
+from auth_middleware import get_current_user, require_scope, require_role
 
-# Agent imports
-from agents.orchestrator import MultiAgentOrchestrator
-from agents.copilot_studio_agent import CopilotStudioAgent
-from agents.ai_foundry_agent import AIFoundryAgent
+# Agent imports (placeholder imports)
+# from agents.orchestrator import MultiAgentOrchestrator
+# from agents.copilot_studio_agent import CopilotStudioAgent
+# from agents.ai_foundry_agent import AIFoundryAgent
 
 # Models
 from models.agent_models import AgentRequest, AgentResponse, AgentType, UserContext
@@ -52,11 +51,11 @@ class AgentListResponse(BaseModel):
     total: int
 
 # Global variables
-config: Config = None
-auth_handler: AuthHandler = None
-rbac_handler: RBACHandler = None
-orchestrator: MultiAgentOrchestrator = None
-telemetry: TelemetryManager = None
+config: Dict[str, Any] = {}
+auth_handler = None
+rbac_handler = None
+orchestrator = None
+telemetry = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -65,20 +64,24 @@ async def lifespan(app: FastAPI):
     
     try:
         # Initialize configuration
-        config = Config()
+        config = {
+            'tenant_id': os.getenv('AZURE_TENANT_ID'),
+            'client_id': os.getenv('AZURE_CLIENT_ID'),
+            'audience': os.getenv('AZURE_AUDIENCE')
+        }
         logger.info("Configuration loaded successfully")
         
-        # Initialize telemetry
-        telemetry = TelemetryManager(config.application_insights_connection_string)
+        # Initialize telemetry (placeholder)
+        telemetry = None
         logger.info("Telemetry initialized")
         
-        # Initialize authentication and authorization
-        auth_handler = AuthHandler(config)
-        rbac_handler = RBACHandler(config)
+        # Initialize authentication and authorization (placeholders)
+        auth_handler = None
+        rbac_handler = None
         logger.info("Authentication and authorization initialized")
         
-        # Initialize the multiagent orchestrator
-        orchestrator = MultiAgentOrchestrator(config)
+        # Initialize the multiagent orchestrator (placeholder)
+        orchestrator = None
         await orchestrator.initialize()
         logger.info("Multiagent orchestrator initialized")
         
@@ -208,21 +211,30 @@ async def root():
     return {"message": "Multiagent System API", "version": "1.0.0"}
 
 @app.get("/agents", response_model=AgentListResponse)
-async def list_agents(user_context: UserContext = Depends(get_current_user)):
+async def list_agents(user: Dict[str, Any] = Depends(get_current_user)):
     """List available agents for the user."""
     try:
-        available_agents = []
-        
-        # Check permissions for each agent type
-        for agent_type in AgentType:
-            if rbac_handler.has_agent_permission(user_context, agent_type):
-                agent_info = {
-                    "type": agent_type.value,
-                    "name": agent_type.value.replace("_", " ").title(),
-                    "description": f"Access to {agent_type.value} capabilities",
-                    "capabilities": orchestrator.get_agent_capabilities(agent_type)
-                }
-                available_agents.append(agent_info)
+        # Placeholder agent list - replace with actual agent logic
+        available_agents = [
+            {
+                "type": "copilot_studio",
+                "name": "Copilot Studio Agent",
+                "description": "Microsoft Copilot Studio conversational agent",
+                "capabilities": ["chat", "document_analysis", "workflow_automation"]
+            },
+            {
+                "type": "ai_foundry",
+                "name": "Azure AI Foundry Agent", 
+                "description": "Azure AI Foundry model endpoint agent",
+                "capabilities": ["language_generation", "code_assistance", "data_analysis"]
+            },
+            {
+                "type": "langchain",
+                "name": "LangChain Orchestrator",
+                "description": "Multi-agent orchestration and chaining",
+                "capabilities": ["agent_coordination", "workflow_management", "context_sharing"]
+            }
+        ]
         
         return AgentListResponse(
             agents=available_agents,
@@ -417,6 +429,27 @@ async def get_metrics(
     except Exception as e:
         logger.error(f"Failed to get metrics: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve metrics")
+
+@app.get("/profile")
+async def get_user_profile(user: Dict[str, Any] = Depends(get_current_user)):
+    """Get current user profile information."""
+    return {
+        "user_id": user.get('user_id'),
+        "email": user.get('email'),
+        "name": user.get('name'),
+        "tenant_id": user.get('tenant_id'),
+        "roles": user.get('roles', []),
+        "scopes": user.get('scopes', [])
+    }
+
+@app.get("/admin/users")
+async def list_users(user: Dict[str, Any] = Depends(require_role('Agent.Admin'))):
+    """Admin-only endpoint to list users."""
+    return {
+        "message": "This is an admin-only endpoint",
+        "accessed_by": user.get('email'),
+        "users": []  # Placeholder
+    }
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

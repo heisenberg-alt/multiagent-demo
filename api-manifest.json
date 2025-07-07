@@ -1,0 +1,34 @@
+{
+  "api": {
+    "oauth2PermissionScopes": [
+      {
+        "adminConsentDescription": "Allow the application to access the Multiagent Demo API on behalf of the signed-in user.",
+        "adminConsentDisplayName": "Access Multiagent Demo API",
+        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        "isEnabled": true,
+        "type": "User",
+        "userConsentDescription": "Allow the application to access the Multiagent Demo API on your behalf.",
+        "userConsentDisplayName": "Access Multiagent Demo API",
+        "value": "access_as_user"
+      }
+    ]
+  },
+  "appRoles": [
+    {
+      "allowedMemberTypes": ["User"],
+      "description": "Users can interact with AI agents",
+      "displayName": "Agent User",
+      "id": "8e3e9c7d-f0c2-4b45-8c3a-9d2f1e0b4a8c",
+      "isEnabled": true,
+      "value": "Agent.User"
+    },
+    {
+      "allowedMemberTypes": ["User"],
+      "description": "Administrators can manage agents and system settings",
+      "displayName": "Agent Administrator",
+      "id": "7d2c8b1a-e9f3-4a56-9b4c-8f1e2d0c5b9a",
+      "isEnabled": true,
+      "value": "Agent.Admin"
+    }
+  ]
+}

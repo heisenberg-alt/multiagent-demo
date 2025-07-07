@@ -1,0 +1,21 @@
+{
+  "spa": {
+    "redirectUris": [
+      "https://green-sand-0a95fec0f.1.azurestaticapps.net",
+      "https://green-sand-0a95fec0f.1.azurestaticapps.net/",
+      "http://localhost:3000",
+      "http://localhost:3000/"
+    ]
+  },
+  "requiredResourceAccess": [
+    {
+      "resourceAppId": "b141e5c0-fccb-4859-9de5-a84c1304ee9d",
+      "resourceAccess": [
+        {
+          "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+          "type": "Scope"
+        }
+      ]
+    }
+  ]
+}
