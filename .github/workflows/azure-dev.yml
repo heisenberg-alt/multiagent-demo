@@ -30,25 +30,35 @@ jobs:
         uses: Azure/setup-azd@v2
       - name: Log in with Azure (Federated Credentials)
         run: |
-          azd auth login `
-            --client-id "$Env:AZURE_CLIENT_ID" `
-            --federated-credential-provider "github" `
-            --tenant-id "$Env:AZURE_TENANT_ID"
-        shell: pwsh
+          azd auth login \
+            --client-id "$AZURE_CLIENT_ID" \
+            --federated-credential-provider "github" \
+            --tenant-id "$AZURE_TENANT_ID"
+        shell: bash
 
-
-      - name: Provision Infrastructure
+      - name: Setup azd environment
         run: |
-          # Configure environment for existing deployment
+          # Initialize environment if it doesn't exist
+          if ! azd env list | grep -q "bobst-agents"; then
+            echo "Creating new azd environment"
+            azd env new bobst-agents --location eastus2
+          fi
+          
+          # Set environment variables
           azd env set AZURE_LOCATION eastus2
           azd env set AZURE_RESOURCE_GROUP rg-bobst-agents  
           azd env set AZURE_PRINCIPAL_ID 44c6741c-0946-4213-b719-eda2cc36b0df
-          
+          azd env set AZURE_SUBSCRIPTION_ID $AZURE_SUBSCRIPTION_ID
+          azd env set AZURE_TENANT_ID $AZURE_TENANT_ID
+        shell: bash
+
+      - name: Provision Infrastructure
+        run: |
           # Check if resource group exists, if so skip provision
           if az group show --name rg-bobst-agents >/dev/null 2>&1; then
             echo "Resource group exists, skipping provision"
-            # Import existing deployment state
-            azd env refresh --no-prompt
+            # Try to refresh the environment from existing resources
+            azd env refresh --no-prompt || echo "Refresh failed, continuing"
           else
             echo "Resource group doesn't exist, provisioning"
             azd provision --no-prompt
