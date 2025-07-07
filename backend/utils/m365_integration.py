@@ -12,9 +12,9 @@ import aiohttp
 from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import ClientAuthenticationError
 
-from ..utils.config import Config
-from ..utils.logger import get_logger
-from ..utils.telemetry import telemetry_client
+from utils.config import Config
+from utils.logger import get_logger
+from utils.telemetry import telemetry_client
 
 logger = get_logger(__name__)
 
