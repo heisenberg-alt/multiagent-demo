@@ -1,0 +1,76 @@
+{
+  "summary": {
+    "total_tests": 11,
+    "passed_tests": 6,
+    "failed_tests": 5,
+    "success_rate": 54.54545454545454
+  },
+  "detailed_results": [
+    {
+      "test_name": "System Initialization",
+      "success": true,
+      "details": "Orchestrator initialized successfully",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "General Copilot Studio Agent",
+      "success": true,
+      "details": "Agent responded successfully",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Business Process Copilot Studio Agent",
+      "success": true,
+      "details": "Agent responded successfully",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Document Processing AI Foundry Agent",
+      "success": true,
+      "details": "Agent responded successfully",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Data Analysis AI Foundry Agent",
+      "success": true,
+      "details": "Agent responded successfully",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Orchestration 1",
+      "success": false,
+      "details": "Failed: 'OrchestrationRequest' object has no attribute 'parameters'",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Orchestration 2",
+      "success": false,
+      "details": "Failed: 'OrchestrationRequest' object has no attribute 'parameters'",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Orchestration 3",
+      "success": false,
+      "details": "Failed: 'OrchestrationRequest' object has no attribute 'parameters'",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "API Simulation",
+      "success": false,
+      "details": "Failed: object list can't be used in 'await' expression",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Chat General Chat",
+      "success": false,
+      "details": "Agent doesn't support chat",
+      "timestamp": "2025-07-07T03:59:00Z"
+    },
+    {
+      "test_name": "Chat Document Processing Chat",
+      "success": true,
+      "details": "Chat response received",
+      "timestamp": "2025-07-07T03:59:00Z"
+    }
+  ]
+}

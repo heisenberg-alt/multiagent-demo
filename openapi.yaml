@@ -1,0 +1,878 @@
+openapi: 3.0.3
+info:
+  title: Multiagent System API
+  description: |
+    API for the multiagent orchestrator system featuring 2 Copilot Studio agents and 2 AI Foundry agents.
+    
+    ## Agent Types
+    - **COPILOT_STUDIO_1**: General conversation and Q&A (agent_id: copilot_1)
+    - **COPILOT_STUDIO_2**: Business process automation (agent_id: copilot_2) 
+    - **AI_FOUNDRY_1**: Document processing (agent_id: ai_foundry_1)
+    - **AI_FOUNDRY_2**: Data analysis (agent_id: ai_foundry_2)
+    
+    ## Authentication
+    All endpoints require Azure AD JWT tokens in the Authorization header.
+  version: 2.0.0
+  contact:
+    name: Multiagent System Support
+    email: support@multiagent-system.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://your-app.azurecontainerapps.io
+    description: Production server
+
+security:
+  - AzureAD: []
+
+paths:
+  /orchestrate:
+    post:
+      summary: Orchestrate request across multiple agents
+      description: |
+        Submit a request to be processed by the orchestrator, which will intelligently 
+        select and coordinate appropriate agents based on the query content and context.
+      operationId: orchestrateRequest
+      tags:
+        - Orchestration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrchestrationRequest'
+            examples:
+              data_analysis:
+                summary: Data analysis request
+                value:
+                  query: "Analyze this sales data and provide insights"
+                  preferred_agents: ["ai_foundry_2"]
+                  orchestration_strategy: "adaptive"
+                  context:
+                    task_type: "data_analysis"
+                    priority: "high"
+              document_processing:
+                summary: Document processing request
+                value:
+                  query: "Extract key information from this contract"
+                  preferred_agents: ["ai_foundry_1"]
+                  context:
+                    document_type: "contract"
+      responses:
+        '200':
+          description: Orchestration completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /agents/copilot_studio_1/query:
+    post:
+      summary: Query Copilot Studio Agent 1 (General)
+      description: Send a query directly to the general conversation Copilot Studio agent
+      operationId: queryCopilotStudio1
+      tags:
+        - Copilot Studio Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRequest'
+            example:
+              query: "Hello, can you help me understand how to use this system?"
+              context:
+                conversation_type: "general"
+              session_id: "session_123"
+      responses:
+        '200':
+          description: Agent response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /agents/copilot_studio_2/query:
+    post:
+      summary: Query Copilot Studio Agent 2 (Business Process)
+      description: Send a query directly to the business process automation Copilot Studio agent
+      operationId: queryCopilotStudio2
+      tags:
+        - Copilot Studio Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRequest'
+            example:
+              query: "Help me set up an approval workflow for expense reports"
+              context:
+                workflow_type: "approval"
+                department: "finance"
+      responses:
+        '200':
+          description: Agent response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+
+  /agents/ai_foundry_1/query:
+    post:
+      summary: Query AI Foundry Agent 1 (Document Processing)
+      description: Submit a document processing request to the AI Foundry document specialist
+      operationId: queryAIFoundry1
+      tags:
+        - AI Foundry Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRequest'
+            example:
+              query: "Extract key information from this contract document"
+              context:
+                document_type: "contract"
+                extraction_fields: ["parties", "dates", "amounts"]
+      responses:
+        '200':
+          description: Processing completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+
+  /agents/ai_foundry_2/query:
+    post:
+      summary: Query AI Foundry Agent 2 (Data Analysis)
+      description: Submit a data analysis request to the AI Foundry data specialist
+      operationId: queryAIFoundry2
+      tags:
+        - AI Foundry Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRequest'
+            example:
+              query: "Analyze this sales data for trends and patterns"
+              context:
+                analysis_type: "trend_analysis"
+                time_period: "quarterly"
+      responses:
+        '200':
+          description: Analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+
+  /agents:
+    get:
+      summary: List all agents
+      description: Get a list of all available agents with their status and capabilities
+      operationId: listAgents
+      tags:
+        - Agent Management
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgentInfo'
+
+  /agents/{agentType}/capabilities:
+    get:
+      summary: Get agent capabilities
+      description: Retrieve detailed capabilities for a specific agent type
+      operationId: getAgentCapabilities
+      tags:
+        - Agent Management
+      parameters:
+        - name: agentType
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/AgentType'
+      responses:
+        '200':
+          description: Agent capabilities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentCapabilities'
+
+  /agents/{agentType}/health:
+    get:
+      summary: Check agent health
+      description: Get the current health status of a specific agent
+      operationId: checkAgentHealth
+      tags:
+        - Agent Management
+      parameters:
+        - name: agentType
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/AgentType'
+      responses:
+        '200':
+          description: Agent health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentHealth'
+
+  /chat/sessions:
+    post:
+      summary: Create chat session
+      description: Create a new chat session for multi-turn conversations
+      operationId: createChatSession
+      tags:
+        - Chat Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSession'
+
+  /chat/sessions/{sessionId}/history:
+    get:
+      summary: Get chat history
+      description: Retrieve the conversation history for a chat session
+      operationId: getChatHistory
+      tags:
+        - Chat Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatHistory'
+
+  /chat/sessions/{sessionId}/messages:
+    post:
+      summary: Send chat message
+      description: Send a message in an existing chat session
+      operationId: sendChatMessage
+      tags:
+        - Chat Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+      responses:
+        '200':
+          description: Message sent and response received
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+
+  /metrics:
+    get:
+      summary: Get system metrics
+      description: Retrieve system performance metrics and agent usage statistics (admin only)
+      operationId: getMetrics
+      tags:
+        - Analytics
+      responses:
+        '200':
+          description: System metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemMetrics'
+
+  /users/{userId}/permissions:
+    get:
+      summary: Get user permissions
+      description: Retrieve permissions for a specific user (admin only)
+      operationId: getUserPermissions
+      tags:
+        - Administration
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissions'
+    post:
+      summary: Update user permissions
+      description: Update permissions for a specific user (admin only)
+      operationId: updateUserPermissions
+      tags:
+        - Administration
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPermissions'
+      responses:
+        '200':
+          description: Permissions updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                  updated:
+                    type: boolean
+
+  /health:
+    get:
+      summary: Health check
+      description: Check the overall health of the system
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: agent_types
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AgentType'
+      responses:
+        '200':
+          description: Usage analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageAnalytics'
+
+components:
+  securitySchemes:
+    AzureAD:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Azure AD JWT token
+
+  schemas:
+    AgentType:
+      type: string
+      enum:
+        - copilot_studio_1
+        - copilot_studio_2
+        - ai_foundry_1
+        - ai_foundry_2
+        - orchestrator
+      description: Available agent types in the system
+
+    OrchestrationRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: The user's query or request
+          example: "Analyze this sales data and create a summary report"
+        preferred_agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentType'
+          description: Preferred agents for handling the request
+        orchestration_strategy:
+          type: string
+          enum: [adaptive, sequential, parallel]
+          default: adaptive
+          description: Strategy for orchestrating agents
+        context:
+          type: object
+          additionalProperties: true
+          description: Additional context for the query
+        session_id:
+          type: string
+          description: Chat session ID if applicable
+        max_agents:
+          type: integer
+          default: 3
+          minimum: 1
+          maximum: 4
+          description: Maximum number of agents to use
+        timeout:
+          type: integer
+          default: 30
+          description: Timeout in seconds
+
+    OrchestrationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        final_response:
+          type: string
+          description: The orchestrated final response
+        agents_used:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentType'
+        agent_responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentResponse'
+        orchestration_metadata:
+          type: object
+          additionalProperties: true
+        execution_time:
+          type: number
+          format: float
+        timestamp:
+          type: string
+          format: date-time
+        strategy_used:
+          type: string
+        error:
+          type: string
+          nullable: true
+
+    AgentRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: The user's query or request
+        context:
+          type: object
+          additionalProperties: true
+          description: Additional context for the query
+        parameters:
+          type: object
+          additionalProperties: true
+          description: Agent-specific parameters
+        session_id:
+          type: string
+          description: Chat session ID if applicable
+        history:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [user, assistant]
+              content:
+                type: string
+        max_tokens:
+          type: integer
+          description: Maximum tokens for response
+        temperature:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 2.0
+          description: Temperature for response generation
+        tools:
+          type: array
+          items:
+            type: string
+          description: Available tools for the agent
+          type: object
+          additionalProperties: true
+          description: Processing context and parameters
+        data:
+          type: object
+          properties:
+            format:
+              type: string
+              enum: [csv, json, xml, text]
+            content:
+              type: string
+              description: Data content (base64 encoded for binary)
+        file_data:
+          type: object
+          properties:
+            content:
+              type: string
+              description: Base64 encoded file content
+            filename:
+              type: string
+            mime_type:
+              type: string
+
+    AgentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        response:
+          type: string
+          description: The agent's response
+        agent_type:
+          $ref: '#/components/schemas/AgentType'
+        agent_id:
+          type: string
+          description: Unique identifier for the agent instance
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Confidence score for the response
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional response metadata
+        usage:
+          type: object
+          properties:
+            tokens_used:
+              type: integer
+        error:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+        execution_time:
+          type: number
+          format: float
+          description: Execution time in seconds
+        tools_used:
+          type: array
+          items:
+            type: string
+
+    SystemMetrics:
+      type: object
+      properties:
+        system_metrics:
+          type: object
+          properties:
+            total_requests:
+              type: integer
+            successful_requests:
+              type: integer
+            failed_requests:
+              type: integer
+            average_response_time:
+              type: number
+              format: float
+            uptime:
+              type: string
+        agent_stats:
+          type: array
+          items:
+            type: object
+            properties:
+              agent_type:
+                $ref: '#/components/schemas/AgentType'
+              total_requests:
+                type: integer
+              successful_requests:
+                type: integer
+              failed_requests:
+                type: integer
+              average_response_time:
+                type: number
+                format: float
+              success_rate:
+                type: number
+                format: float
+
+    UserPermissions:
+      type: object
+      properties:
+        user_id:
+          type: string
+        permissions:
+          type: object
+          additionalProperties: true
+          description: User-specific permissions and roles
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ChatMessage:
+      type: object
+      required:
+        - content
+        - role
+      properties:
+        content:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant]
+        timestamp:
+          type: string
+          format: date-time
+
+    ChatResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          $ref: '#/components/schemas/ChatMessage'
+        agent_responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentResponse'
+        session_id:
+          type: string
+
+    CreateSessionRequest:
+      type: object
+      properties:
+        session_name:
+          type: string
+        preferred_agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentType'
+        context:
+          type: object
+          additionalProperties: true
+
+    AgentInfo:
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentType'
+        agent_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        specialization:
+          type: string
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+        capabilities:
+          type: array
+          items:
+            type: string
+        last_health_check:
+          type: string
+          format: date-time
+
+    AgentCapabilities:
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentType'
+        agent_id:
+          type: string
+        specialization:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              input_types:
+                type: array
+                items:
+                  type: string
+              output_types:
+                type: array
+                items:
+                  type: string
+              parameters:
+                type: object
+                additionalProperties: true
+
+    AgentHealth:
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/AgentType'
+        agent_id:
+          type: string
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+        last_check:
+          type: string
+          format: date-time
+        response_time:
+          type: number
+          format: float
+        error_rate:
+          type: number
+          format: float
+        availability:
+          type: number
+          format: float
+        details:
+          type: object
+          properties:
+            endpoint_status:
+              type: string
+            authentication:
+              type: string
+            last_successful_request:
+              type: string
+              format: date-time
+
+    // ...existing code...
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: "INVALID_REQUEST"
+              message: "Request format or parameters are invalid"
+              timestamp: "2025-07-07T10:30:00Z"
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: "AUTHENTICATION_REQUIRED"
+              message: "Valid JWT token required"
+              timestamp: "2025-07-07T10:30:00Z"
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: "INSUFFICIENT_PERMISSIONS"
+              message: "User lacks required permissions"
+              timestamp: "2025-07-07T10:30:00Z"
+
+    ServiceUnavailable:
+      description: Service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: "AGENT_UNAVAILABLE"
+              message: "The requested agent is currently unavailable"
+              timestamp: "2025-07-07T10:30:00Z"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: "ORCHESTRATION_FAILED"
+              message: "Orchestration process failed"
+              timestamp: "2025-07-07T10:30:00Z"
+
+tags:
+  - name: Orchestration
+    description: Multi-agent orchestration endpoints
+  - name: Copilot Studio Agents
+    description: Direct access to Copilot Studio agents
+  - name: AI Foundry Agents
+    description: Direct access to AI Foundry agents
+  - name: Agent Management
+    description: Agent status and capability management
+  - name: Chat Sessions
+    description: Chat session management
+  - name: Analytics
+    description: Usage analytics and monitoring
+  - name: Administration
+    description: User and permission management
+  - name: Health
+    description: System health monitoring

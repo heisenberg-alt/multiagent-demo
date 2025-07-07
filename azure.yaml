@@ -1,0 +1,38 @@
+# Azure Developer CLI (azd) configuration file
+name: multiagent-demo
+metadata:
+  template: multiagent-demo@1.0.0
+  description: A multiagent system demo with Copilot Studio, Azure AI Foundry agents, and LangChain orchestration
+
+hooks:
+  postdeploy:
+    shell: pwsh
+    run: |
+      Write-Host "Multiagent system deployed successfully!"
+      Write-Host "Configure Entra ID authentication and RBAC permissions as needed."
+
+services:
+  backend:
+    project: ./backend
+    language: python
+    host: containerapp
+    env:
+      - AZURE_TENANT_ID
+      - AZURE_CLIENT_ID
+      - AZURE_CLIENT_SECRET
+      - AZURE_OPENAI_ENDPOINT
+      - AZURE_AI_FOUNDRY_ENDPOINT
+      - COPILOT_STUDIO_ENDPOINT
+      - MICROSOFT_GRAPH_ENDPOINT
+      - LANGCHAIN_TRACING_V2=false
+      - LANGCHAIN_PROJECT=multiagent-demo
+    
+  frontend:
+    project: ./frontend
+    language: js
+    host: staticwebapp
+    env:
+      - REACT_APP_AZURE_CLIENT_ID
+      - REACT_APP_AZURE_TENANT_ID
+      - REACT_APP_BACKEND_URL
+      - REACT_APP_REDIRECT_URI
